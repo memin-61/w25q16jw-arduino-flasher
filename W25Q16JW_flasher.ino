@@ -54,8 +54,6 @@ const uint8_t CS_PIN = 10;
 // ── Constants ──────────────────────────────────────────────────
 constexpr uint32_t CHIP_SIZE  = 0x200000;  // 2,097,152 bytes
 constexpr uint16_t PAGE_SIZE  = 256;
-constexpr uint32_t SECTOR_SIZE = 4096;
-constexpr uint32_t SECTORS    = CHIP_SIZE / SECTOR_SIZE;  // 512
 
 // ── Low-level helpers ──────────────────────────────────────────
 inline void cs_low()  { digitalWrite(CS_PIN, LOW);  delayMicroseconds(1); }
@@ -164,44 +162,6 @@ void cmd_erase() {
     Serial.println(b == 0xFF ? F("SUCCESS") : F("FAILED"));
 }
 
-void cmd_sector_erase() {
-    Serial.println(F("Sector-by-sector erase (512 x 4KB). Send Y to confirm."));
-    while (!Serial.available());
-    if (Serial.read() != 'Y') { Serial.println(F("Cancelled.")); return; }
-
-    ensure_unlocked();
-    unsigned long start = millis();
-    uint16_t errors = 0;
-
-    for (uint32_t addr = 0; addr < CHIP_SIZE; addr += SECTOR_SIZE) {
-        write_enable();
-        cs_low();
-        spi_xfer(SECTOR_ERASE_4K);
-        spi_xfer((addr >> 16) & 0xFF);
-        spi_xfer((addr >> 8) & 0xFF);
-        spi_xfer(addr & 0xFF);
-        cs_high();
-        wait_busy(5000);
-
-        cs_low(); spi_xfer(READ_DATA);
-        spi_xfer((addr >> 16) & 0xFF);
-        spi_xfer((addr >> 8) & 0xFF);
-        spi_xfer(addr & 0xFF);
-        if (spi_xfer(0x00) != 0xFF) errors++;
-        cs_high();
-
-        if ((addr / SECTOR_SIZE) % 64 == 0) {
-            Serial.print(addr / SECTOR_SIZE);
-            Serial.print('/'); Serial.print(SECTORS);
-            Serial.print(F(" err:")); Serial.println(errors);
-        }
-    }
-
-    Serial.print(F("Done in ")); Serial.print((millis() - start) / 1000.0);
-    Serial.print('s'); Serial.print(F("  errors: ")); Serial.println(errors);
-    Serial.println(errors == 0 ? F("SUCCESS") : F("FAILED"));
-}
-
 void cmd_debug() {
     uint8_t sr1 = read_sr(READ_SR1), sr2 = read_sr(READ_SR2);
     Serial.print(F("SR1=0x")); Serial.print(sr1, HEX);
@@ -308,7 +268,7 @@ void setup() {
     SPI.beginTransaction(SPISettings(2000000, MSBFIRST, SPI_MODE0));
     delay(100);
 
-    Serial.println(F("\nW25Q16JW Flasher ready. I=Info P=Peek R=Read E=Erase S=SecErase W=Write V=Verify D=Debug"));
+    Serial.println(F("\nW25Q16JW Flasher ready. I=Info P=Peek R=Read E=Erase W=Write V=Verify D=Debug"));
 }
 
 void loop() {
@@ -321,7 +281,6 @@ void loop() {
         case 'P': case 'p': cmd_peek();          break;
         case 'R': case 'r': cmd_read();          break;
         case 'E': case 'e': cmd_erase();         break;
-        case 'S': case 's': cmd_sector_erase();  break;
         case 'W': case 'w': cmd_write();         break;
         case 'D': case 'd': cmd_debug();         break;
         default: Serial.print(F("? ")); Serial.println(c);

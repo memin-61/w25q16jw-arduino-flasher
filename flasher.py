@@ -12,7 +12,6 @@ Commands:
   peek          Read first 64 bytes
   read <file>   Read entire chip, save to file
   erase         Full chip erase (asks confirmation)
-  sector-erase  Sector-by-sector erase (512 x 4KB, more reliable)
   write <file>  Write ROM file to chip with verification
   verify <file> Verify chip matches ROM file
   debug         Clear CMP + test sector 0 erase
@@ -28,6 +27,16 @@ import argparse
 
 CHIP_SIZE = 2097152  # 2,097,152 bytes
 PAGE_SIZE = 256
+
+
+def detect_port():
+    """Auto-detect Arduino serial port."""
+    import glob
+    for pattern in ['/dev/ttyUSB*', '/dev/ttyACM*']:
+        ports = sorted(glob.glob(pattern))
+        if ports:
+            return ports[0]
+    return None
 
 
 def open_serial(port, baud):
@@ -126,9 +135,8 @@ def cmd_read(ser, outfile):
     print(f"\nSaved {len(chip):,} bytes to {outfile} in {elapsed:.0f}s")
 
 
-def cmd_erase(ser, sector_mode=False):
-    cmd = b"S" if sector_mode else b"E"
-    ser.write(cmd)
+def cmd_erase(ser):
+    ser.write(b"E")
     time.sleep(0.5)
     print(ser.read(ser.in_waiting).decode(errors="replace"))
 
@@ -215,11 +223,11 @@ def cmd_verify(ser, romfile):
 
 def main():
     parser = argparse.ArgumentParser(description="W25Q16JW SPI Flasher")
-    parser.add_argument("--port", default="/dev/ttyUSB0", help="Serial port")
+    parser.add_argument("--port", default=None, help="Serial port (auto-detected if not specified)")
     parser.add_argument("--baud", type=int, default=115200, help="Baud rate")
     parser.add_argument(
         "command",
-        choices=["info", "peek", "read", "erase", "sector-erase", "write", "verify", "debug"],
+        choices=["info", "peek", "read", "erase", "write", "verify", "debug"],
         help="Command to execute",
     )
     parser.add_argument("file", nargs="?", help="ROM file for read/write/verify")
@@ -227,6 +235,13 @@ def main():
 
     if args.command in ("read", "write", "verify") and not args.file:
         parser.error(f"{args.command} requires a file argument")
+
+    if not args.port:
+        args.port = detect_port()
+        if not args.port:
+            print("No Arduino detected. Check USB connection or use --port.")
+            sys.exit(1)
+        print(f"Auto-detected port: {args.port}")
 
     ser = open_serial(args.port, args.baud)
 
@@ -239,9 +254,7 @@ def main():
     elif args.command == "read":
         cmd_read(ser, args.file)
     elif args.command == "erase":
-        cmd_erase(ser, sector_mode=False)
-    elif args.command == "sector-erase":
-        cmd_erase(ser, sector_mode=True)
+        cmd_erase(ser)
     elif args.command == "write":
         cmd_write(ser, args.file)
     elif args.command == "verify":

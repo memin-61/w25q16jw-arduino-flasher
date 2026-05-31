@@ -48,8 +48,8 @@ python3 flasher.py --port /dev/ttyUSB0 peek
 # Read entire chip to file
 python3 flasher.py --port /dev/ttyUSB0 read backup.rom
 
-# Sector-by-sector erase (reliable, ~60s)
-python3 flasher.py --port /dev/ttyUSB0 sector-erase
+# Full chip erase (~3.4s)
+python3 flasher.py --port /dev/ttyUSB0 erase
 
 # Write ROM with page-level verification
 python3 flasher.py --port /dev/ttyUSB0 write stock.rom
