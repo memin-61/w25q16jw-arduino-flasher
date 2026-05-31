@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-W25Q16JW Flasher — Python CLI
+w25q16jw-arduino-flasher — Python CLI
 ==============================
 Read, erase, write, and verify Winbond W25Q16JW SPI flash via Arduino.
 
@@ -226,7 +226,7 @@ def cmd_verify(ser, romfile):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="W25Q16JW SPI Flasher")
+    parser = argparse.ArgumentParser(description="w25q16jw-arduino-flasher")
     parser.add_argument("--port", default=None, help="Serial port (auto-detected if not specified)")
     parser.add_argument("--baud", type=int, default=115200, help="Baud rate")
     parser.add_argument(

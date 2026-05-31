@@ -1,5 +1,5 @@
 /*
- * W25Q16JW Flasher — Arduino Uno R3
+ * w25q16jw-arduino-flasher — Arduino Uno R3
  * ===================================
  * Read, erase, write, and verify Winbond W25Q16JW (16Mbit / 2MB) SPI flash.
  *
@@ -268,7 +268,7 @@ void setup() {
     SPI.beginTransaction(SPISettings(2000000, MSBFIRST, SPI_MODE0));
     delay(100);
 
-    Serial.println(F("\nW25Q16JW Flasher ready. I=Info P=Peek R=Read E=Erase W=Write V=Verify D=Debug"));
+    Serial.println(F("\nw25q16jw-arduino-flasher ready. I=Info P=Peek R=Read E=Erase W=Write V=Verify D=Debug"));
 }
 
 void loop() {

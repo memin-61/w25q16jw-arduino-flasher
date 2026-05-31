@@ -1,4 +1,4 @@
-# W25Q16JW Flasher
+# w25q16jw-arduino-flasher
 
 Arduino-based SPI programmer for Winbond W25Q16JW (16Mbit / 2MB) flash chips — the kind found on NVIDIA RTX 3060 GPUs.
 
@@ -41,7 +41,7 @@ Pins 3 (WP#) and 7 (HOLD#) can be left floating — the W25Q16JW has QE=1 by fac
 
 ### Arduino
 
-Upload `W25Q16JW_flasher.ino` via Arduino IDE or arduino-cli:
+Upload `w25q16jw-arduino-flasher.ino` via Arduino IDE or arduino-cli:
 
 ```bash
 arduino-cli compile --fqbn arduino:avr:uno .
