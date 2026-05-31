@@ -205,6 +205,10 @@ def cmd_verify(ser, romfile):
     with open(romfile, "rb") as f:
         expected = f.read()
 
+    # Pad to chip size (same as write does)
+    if len(expected) < CHIP_SIZE:
+        expected = expected + b"\xFF" * (CHIP_SIZE - len(expected))
+
     tmp = "/tmp/w25_verify_dump.bin"
     cmd_read(ser, tmp)
 

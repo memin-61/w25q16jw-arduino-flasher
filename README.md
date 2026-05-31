@@ -2,6 +2,18 @@
 
 Arduino-based SPI programmer for Winbond W25Q16JW (16Mbit / 2MB) flash chips — the kind found on NVIDIA RTX 3060 GPUs.
 
+## Why this exists
+
+flashrom may report "Block protection is disabled" when BP bits are zero, but the W25Q16JW can still reject erase operations if **SR2 bit 6 (CMP)** is set.
+
+This tool explicitly reads SR2 and clears CMP before erase/write:
+
+```
+SR2 0x42 → 0x02
+```
+
+If your chip reads fine but silently ignores all erase commands, even with Write Enable succeeding, check SR2 for CMP.
+
 ## Hardware
 
 - Arduino Uno R3 (or compatible)
