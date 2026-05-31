@@ -1,6 +1,6 @@
 # w25q16jw-arduino-flasher
 
-Arduino-based SPI programmer for Winbond W25Q16JW (16Mbit / 2MB) flash chips — the kind found on NVIDIA RTX 3060 GPUs.
+Arduino-based SPI programmer for Winbond W25Q16JW (16Mbit / 2MB) flash chips.
 
 ## Why this exists
 
