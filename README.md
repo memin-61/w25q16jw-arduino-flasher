@@ -86,5 +86,5 @@ All commands are single ASCII characters. Multi-page operations (read/write) use
 |---------|-----|
 | Erase ignored (WEL clears, BUSY=0) | Run `debug` to clear CMP bit |
 | All reads return 0x00 | Check clip connection / power |
-| Write returns errors | Chip must be erased first (`sector-erase`) |
+| Write returns errors | Chip must be erased first |
 | Arduino resets on connect | Use `ser.dtr = False` or 10µF cap on RESET |
