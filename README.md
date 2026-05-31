@@ -80,6 +80,42 @@ All commands are single ASCII characters. Multi-page operations (read/write) use
 - **Read**: Arduino prints `START` → sends 256-byte pages → waits for `N` ack between pages
 - **Write**: Arduino prints `READY` → expects 256-byte pages → prints `NEXT` after each write
 
+## Real-World Recovery Case
+
+This project was created during recovery of a bricked ASUS RTX3060 Phoenix V2 whose Winbond W25Q16JW flash appeared completely writable-disabled.
+
+Symptoms:
+
+* JEDEC ID read correctly (`EF 60 15`)
+* Reads were perfectly stable
+* `flashrom` reported "Block protection is disabled"
+* Write Enable (WREN) succeeded
+* Erase operations were silently ignored
+* Write operations failed because sectors never erased
+
+Root cause:
+
+SR2 was `0x42`.
+
+The CMP (Complement Protect) bit was set:
+
+```text
+SR2 = 0x42
+         ^
+         CMP = 1
+```
+
+Changing:
+
+```text
+0x42 → 0x02
+```
+
+cleared CMP and immediately restored erase/program functionality.
+
+This repository automatically checks and clears CMP before erase/write operations.
+
+
 ## Common Issues
 
 | Symptom | Fix |
